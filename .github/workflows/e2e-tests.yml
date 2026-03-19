@@ -1,0 +1,54 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run tests against"
+        required: true
+        type: choice
+        options:
+          - dev
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm run cy:run
+        env:
+          ENV: ${{ inputs.environment }}
+
+      - name: Merge mochawesome reports
+        if: always()
+        run: |
+          npx mochawesome-merge cypress/reports/mochawesome/*.json -o cypress/reports/mochawesome/merged.json
+          npx marge cypress/reports/mochawesome/merged.json --reportDir cypress/reports/mochawesome --inline
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mochawesome-report
+          path: cypress/reports/mochawesome
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

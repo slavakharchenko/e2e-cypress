@@ -1,0 +1,42 @@
+{
+  "name": "e2e-cypress",
+  "version": "1.0.0",
+  "description": "Cypress E2E testing template with Page Object & Page Element patterns",
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run --browser chrome",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slavakharchenko/e2e-cypress.git"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
+    "cypress": "^15.12.0",
+    "dotenv": "^17.3.1",
+    "eslint": "^10.0.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-cypress": "^6.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^5.1.1",
+    "mochawesome-report-generator": "^6.3.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
+  },
+  "dependencies": {
+    "@playwright/cli": "^0.1.1"
+  }
+}

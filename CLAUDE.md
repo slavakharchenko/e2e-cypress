@@ -1,0 +1,188 @@
+# CLAUDE.md — Cypress E2E Test Template
+
+## Project Overview
+
+This is a Cypress E2E testing template using TypeScript, Page Object Model (POM), and reusable Page Element components. The architecture separates selectors, actions, and assertions into composable layers.
+
+## Commands
+
+- `npm run cy:open` — open Cypress Test Runner (interactive)
+- `npm run cy:run` — run tests headlessly
+- `npm run lint` — check ESLint
+- `npm run lint:fix` — auto-fix ESLint issues
+- `npm run format` — format with Prettier
+- `npm run format:check` — check formatting
+
+## Architecture
+
+```
+cypress/
+├── e2e/                  # Test specs (*.cy.ts)
+├── page-elements/        # Reusable UI element classes
+├── page-objects/         # Page Object Model classes
+├── data/                 # Test data generators (Faker)
+└── support/              # Custom commands & setup
+```
+
+### Three-Layer Pattern
+
+1. **Page Elements** (`cypress/page-elements/`) — low-level, reusable UI component wrappers (BaseElement → ButtonElement, InputElement, etc.)
+2. **Page Objects** (`cypress/page-objects/`) — page-specific classes composing elements and exposing high-level actions (BasePage → LoginPage, etc.)
+3. **Test Specs** (`cypress/e2e/`) — test files using page objects, containing no selectors or direct DOM manipulation
+
+## Code Style & Conventions
+
+- **Quotes**: double quotes (`"`)
+- **Semicolons**: yes
+- **Trailing commas**: all
+- **Print width**: 100
+- **Indent**: 2 spaces
+
+## Best Practices for Writing E2E Tests
+
+### Selectors
+
+- **Selector priority** (use the highest available):
+  1. `data-testid` — preferred, most stable: `[data-testid='submit']`
+  2. `id` — acceptable fallback: `#submit-button`
+  3. CSS class — last resort: `.btn-submit`
+- Always use the shortest, most stable path to the element
+- Keep selectors in Page Element constructors, never in test files
+
+### Page Elements
+
+- Every new UI component type (dropdown, checkbox, modal, etc.) gets its own element class extending `BaseElement`
+- Element classes contain **only** actions (`click()`, `type()`, `select()`) and assertions (`shouldBeVisible()`, `shouldHaveValue()`)
+- **All methods must return `this`** to enable fluent chaining
+- Use the protected `el` getter to access `cy.get(this.selector)` — never call `cy.get()` directly in subclasses except when `should("not.exist")` requires a fresh query
+- Export all elements from `cypress/page-elements/index.ts`
+
+```ts
+// Good: new element class
+export class DropdownElement extends BaseElement {
+  select(value: string): this {
+    this.el.select(value);
+    return this;
+  }
+
+  shouldHaveSelected(value: string): this {
+    this.el.should("have.value", value);
+    return this;
+  }
+}
+```
+
+### Page Objects
+
+- One class per page/logical view, extending `BasePage`
+- Define `protected readonly url` for the page route
+- Compose elements as `readonly` properties with `data-testid` selectors
+- Add high-level methods for multi-step user flows (e.g., `login(user, pass)`)
+- **All methods must return `this`**
+- Export all page objects from `cypress/page-objects/index.ts`
+
+```ts
+// Good: page object
+export class RegistrationPage extends BasePage {
+  protected readonly url = "/register";
+
+  readonly emailInput = new InputElement("[data-testid='email']");
+  readonly passwordInput = new InputElement("[data-testid='password']");
+  readonly submitButton = new ButtonElement("[data-testid='register-submit']");
+
+  register(email: string, password: string): this {
+    this.emailInput.type(email);
+    this.passwordInput.type(password);
+    this.submitButton.click();
+    return this;
+  }
+}
+```
+
+### Test Specs
+
+- File naming: `<feature>.cy.ts` in `cypress/e2e/`
+- Instantiate page objects at `describe` scope, **not** inside `it` blocks
+- Use `beforeEach` for navigation and common setup
+- One assertion concern per `it` block — but multiple related assertions are fine
+- **Never use selectors or `cy.get()` directly** in test files — go through page objects
+- Use descriptive `it` names starting with "should": `it("should show error on invalid login")`
+- Avoid `cy.wait(ms)` — rely on Cypress built-in retryability and assertions
+
+```ts
+// Good: test spec
+import { LoginPage } from "../page-objects";
+import { generateUser } from "../data";
+
+describe("Login Page", () => {
+  const loginPage = new LoginPage();
+
+  beforeEach(() => {
+    loginPage.visit();
+  });
+
+  it("should display login form elements", () => {
+    loginPage.usernameInput.shouldBeVisible();
+    loginPage.passwordInput.shouldBeVisible();
+    loginPage.submitButton.shouldBeVisible();
+  });
+
+  it("should login with valid credentials", () => {
+    const user = generateUser();
+    loginPage.login(user.username, user.password);
+    cy.url().should("not.include", "/login");
+  });
+});
+```
+
+### Test Data
+
+- Generate dynamic test data using `@faker-js/faker` in `cypress/data/`
+- File naming: `<entity>.data.ts` (e.g., `user.data.ts`, `order.data.ts`)
+- Export factory functions: `generateUser()`, `generateOrder()`, etc.
+- Export all generators from `cypress/data/index.ts`
+- Never hardcode credentials or sensitive data — use environment variables via `Cypress.env()`
+
+```ts
+// Good: data generator (cypress/data/user.data.ts)
+import { faker } from "@faker-js/faker";
+
+export function generateUser() {
+  return {
+    username: faker.internet.username(),
+    email: faker.internet.email(),
+    password: faker.internet.password({ length: 12 }),
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
+  };
+}
+```
+
+### Custom Commands
+
+- Define in `cypress/support/commands.ts`
+- Use for cross-cutting concerns (API auth, session management)
+- Prefer page objects over custom commands for page-specific logic
+
+### Assertions
+
+- Use Cypress `.should()` assertions — they auto-retry
+- Chain assertions for readability: `.should("be.visible").and("contain.text", "Welcome")`
+- Negative assertions: use `should("not.exist")` instead of `should("not.be.visible")` when the element should be absent from DOM
+
+### Environment
+
+- Set `ENV=dev|staging|prod` in `.env` to switch target environment
+- Base URLs are configured in `config.ts`
+- Access environment variables in tests via `Cypress.env("envName")`
+
+### Anti-Patterns to Avoid
+
+- **No `cy.wait(N)`** — use assertions for implicit waiting
+- **No selectors in test files** — always go through page elements/objects
+- **No `cy.get()` in tests** — use page objects
+- **No brittle selectors** (classes, tags, nth-child) — use `data-testid`
+- **No shared mutable state between tests** — each test must be independent
+- **No conditional logic in tests** (`if/else`) — tests must be deterministic
+- **No excessive setup** — if a test needs too much setup, use API calls to shortcut the UI
+- **No assertions in page objects** beyond element-level should-methods — keep test logic in specs

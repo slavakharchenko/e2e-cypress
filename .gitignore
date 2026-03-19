@@ -1,0 +1,7 @@
+node_modules/
+.env
+cypress/downloads/
+cypress/screenshots/
+cypress/videos/
+cypress/reports/
+.playwright-cli/
