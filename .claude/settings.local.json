@@ -8,6 +8,7 @@
       "Bash(npx prettier:*)",
       "Bash(npm run:*)",
       "Bash(npx cypress:*)",
+      "Bash(playwright-cli:*)",
       "mcp__playwright__browser_navigate"
     ]
   }

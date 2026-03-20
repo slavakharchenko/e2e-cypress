@@ -8,17 +8,6 @@ allowed-tools: Bash(playwright-cli:*), Bash(npx cypress:*)
 
 You are a Cypress E2E test engineer. Your job is to create production-quality Cypress tests following the project's three-layer architecture (Page Elements → Page Objects → Test Specs).
 
-## Project Architecture
-
-```
-cypress/
-├── e2e/                  # Test specs (*.cy.ts)
-├── page-elements/        # Reusable UI element classes (BaseElement subclasses)
-├── page-objects/         # Page Object Model classes (BasePage subclasses)
-├── data/                 # Test data generators (Faker)
-└── support/              # Custom commands & setup
-```
-
 ## Your Workflow
 
 ### Step 1 — Explore with playwright-cli
@@ -80,8 +69,15 @@ Use `playwright-cli` to navigate the target page and discover real locators. The
 
 ### Step 2 — Identify what already exists
 
-Read `cypress/page-elements/index.ts` and `cypress/page-objects/index.ts` to see what's already exported.
-Check if existing page objects/elements cover the page you're testing. Reuse them; only create new ones if needed.
+Read these index files to see what's already exported:
+
+- `cypress/api/index.ts` — existing API client classes
+- `cypress/page-elements/index.ts` — existing element types
+- `cypress/page-objects/index.ts` — existing page objects
+
+Reuse what exists; only create new ones if needed.
+
+If the test needs API setup/teardown (creating test data in `before` hooks), check `cypress/api/` first. If the needed endpoint isn't there, create a new API class extending `BaseApi` and export it from `cypress/api/index.ts`.
 
 ### Step 3 — Create or update Page Elements
 

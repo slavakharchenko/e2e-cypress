@@ -2,21 +2,35 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const baseUrls: Record<string, string> = {
-  dev: "https://www.cypress.io",
-  staging: "https://www.cypress.io",
-  prod: "https://www.cypress.io",
+interface EnvConfig {
+  baseUrl: string;
+  apiUrl: string;
+}
+
+const environments: Record<string, EnvConfig> = {
+  dev: {
+    baseUrl: "https://www.cypress.io",
+    apiUrl: "https://api.example.com",
+  },
+  staging: {
+    baseUrl: "https://www.cypress.io",
+    apiUrl: "https://api.example.com",
+  },
+  prod: {
+    baseUrl: "https://www.cypress.io",
+    apiUrl: "https://api.example.com",
+  },
 };
 
 export function getConfig() {
   const envName = process.env.ENV || "dev";
-  const baseUrl = baseUrls[envName];
+  const env = environments[envName];
 
-  if (!baseUrl) {
+  if (!env) {
     throw new Error(
-      `Unknown environment: "${envName}". Expected one of: ${Object.keys(baseUrls).join(", ")}`,
+      `Unknown environment: "${envName}". Expected one of: ${Object.keys(environments).join(", ")}`,
     );
   }
 
-  return { envName, baseUrl };
+  return { envName, ...env };
 }
