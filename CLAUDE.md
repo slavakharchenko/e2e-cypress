@@ -1,5 +1,12 @@
 # CLAUDE.md — Cypress E2E Test Template
 
+## File Sync Rule
+
+**README.md and CLAUDE.md must stay in sync.** README.md is a shortened version of CLAUDE.md (no code examples, condensed rules). When you update either file, update the other to match:
+
+- CLAUDE.md updated → update README.md (condense new content)
+- README.md updated → update CLAUDE.md (expand with full details/examples)
+
 ## Project Overview
 
 This is a Cypress E2E testing template using TypeScript, Page Object Model (POM), and reusable Page Element components. The architecture separates selectors, actions, and assertions into composable layers.

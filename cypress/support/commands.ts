@@ -1,9 +1,9 @@
 import { type ZodType } from "zod";
 import { validateSchema, assertSchema } from "./schema-validator";
 
-// @ts-expect-error -- Cypress Commands.add overloads don't support generic custom commands
 Cypress.Commands.add(
   "validateSchema",
+  // @ts-expect-error -- Cypress Commands.add overloads don't support generic custom commands
   { prevSubject: true },
   (subject: unknown, schema: ZodType) => {
     return validateSchema(schema, subject);
