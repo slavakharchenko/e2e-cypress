@@ -25,6 +25,7 @@ This is a Cypress E2E testing template using TypeScript, Page Object Model (POM)
 ```
 cypress/
 ├── api/                  # API client classes (BaseApi subclasses)
+├── db/                   # Database client (Knex.js) and task functions
 ├── e2e/                  # Test specs (*.cy.ts)
 ├── page-elements/        # Reusable UI element classes
 ├── page-objects/         # Page Object Model classes
@@ -184,6 +185,37 @@ export function generateUser() {
 - Set `ENV=dev|staging|prod` in `.env` to switch target environment
 - Base URLs are configured in `config.ts`
 - Access public config via `Cypress.expose("key")`, sensitive values via `cy.env(["key"])`
+
+### Database
+
+- DB operations run in Node.js (server-side) via `cy.task()` — never in the browser
+- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` are set in `.env` — never expose them via `Cypress.expose()`
+- Connection is lazy-initialized — no connection until a test actually calls a DB task
+- Connection is destroyed after all tests via `after:run` event
+- Define task functions in `cypress/db/tasks.ts`, then register them in `cypress.config.ts` `setupNodeEvents`
+- Use `getDb()` from `cypress/db` to access the Knex instance inside task functions
+- Keep DB calls in `beforeEach`/`before` hooks for test setup — avoid DB calls inside `it` blocks when possible
+
+```ts
+// cypress/db/tasks.ts — define a task function
+import { getDb } from "./db-client";
+
+export function getUserByEmail(email: string) {
+  return getDb()("users").where({ email }).first();
+}
+
+// cypress.config.ts — register in setupNodeEvents
+on("task", {
+  getUserByEmail,
+});
+
+// cypress/e2e/user.cy.ts — use in a test
+before(() => {
+  cy.task("getUserByEmail", "test@example.com").then((user) => {
+    expect(user).to.have.property("email", "test@example.com");
+  });
+});
+```
 
 ### Anti-Patterns to Avoid
 

@@ -25,6 +25,7 @@ cp .env.example .env
 ```
 cypress/
 ├── api/                  # API client classes (BaseApi subclasses)
+├── db/                   # Database client (Knex.js) and task functions
 ├── e2e/                  # Test specs (*.cy.ts)
 ├── page-elements/        # Reusable UI element classes
 ├── page-objects/         # Page Object Model classes
@@ -55,6 +56,10 @@ cypress/
 ## Anti-Patterns
 
 - No `cy.wait(N)`, no selectors in tests, no `cy.get()` in tests, no brittle selectors, no shared mutable state, no conditional logic in tests, no assertions in page objects beyond element-level.
+
+## Database
+
+PostgreSQL integration via `cy.task()`. Set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` in `.env`. Define task functions in `cypress/db/tasks.ts`, register them in `cypress.config.ts` `setupNodeEvents`. Connection is lazy-initialized and destroyed after all tests.
 
 ## Environment
 

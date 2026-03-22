@@ -1,5 +1,6 @@
 import { defineConfig } from "cypress";
 import { getConfig } from "./config";
+import { destroyDb } from "./cypress/db";
 
 const { envName, baseUrl, apiUrl } = getConfig();
 
@@ -20,6 +21,16 @@ export default defineConfig({
       overwrite: false,
       html: false,
       json: true,
+    },
+    setupNodeEvents(on) {
+      on("task", {
+        // Register DB task functions here:
+        // ...dbTasks,
+      });
+
+      on("after:run", async () => {
+        await destroyDb();
+      });
     },
   },
 });
