@@ -4,4 +4,5 @@ cypress/downloads/
 cypress/screenshots/
 cypress/videos/
 cypress/reports/
+cypress/test-plans
 .playwright-cli/

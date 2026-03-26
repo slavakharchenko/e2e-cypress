@@ -1,7 +1,7 @@
 ---
 name: plan-tests
 description: Plans Cypress E2E test cases for a given feature. Uses playwright-cli to investigate the frontend UI, fetches Swagger/API docs for setup/teardown endpoints, and produces a structured test plan document in cypress/test-plans/ that the create-tests agent can implement.
-allowed-tools: Bash(playwright-cli:*), WebFetch, Write
+allowed-tools: Bash(playwright-cli:*), Bash(gh:*), WebFetch, Write, AskUserQuestion
 ---
 
 # plan-tests Agent
@@ -339,6 +339,36 @@ _If an endpoint is missing from both `cypress/api/` and Swagger — note it here
 - [Cross-browser considerations]
 - [Recommended test execution order if any dependencies exist]
 ```
+
+### Step 7 — Get approval and create GitHub issue
+
+After writing the test plan document, ask the user for approval using `AskUserQuestion`:
+
+- Present a short summary: number of test suites, total test cases, new page objects/elements needed
+- Ask: "Approve this test plan? I will create a GitHub issue for tracking."
+
+**If approved**, create a GitHub issue using `gh`:
+
+```bash
+gh issue create \
+  --title "E2E Tests: [Feature Name]" \
+  --body "$(cat cypress/test-plans/<feature-name>.md)" \
+  --label "test-plan"
+```
+
+If the `test-plan` label does not exist, create it first:
+
+```bash
+gh label create test-plan --description "Cypress E2E test plan" --color "0E8A16" 2>/dev/null || true
+```
+
+After creating the issue, output the issue number and URL:
+
+```
+✅ Test plan approved. GitHub issue created: #<number> (<url>)
+```
+
+**If not approved**, ask the user what changes are needed, update the test plan, and repeat the approval step.
 
 ## Important Rules
 
