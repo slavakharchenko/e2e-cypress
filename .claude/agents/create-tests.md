@@ -168,24 +168,22 @@ After all tests pass, present a summary to the user and ask for review using `As
 
 - List all files created/modified (page elements, page objects, data generators, test specs)
 - Show the number of test cases implemented and their pass/fail status
-- Ask: "Please review the tests. Approve to proceed with branch creation, or let me know what to change."
+- Ask: "Please review the tests. Approve to proceed with commit and branch creation, or let me know what to change."
 
 If the user requests changes — make them, re-run the tests, and ask again.
 
 ### Step 8 — Commit and create branch
 
-Once approved:
+**Immediately after user approves** (do NOT return or stop — continue in the same session):
 
 1. **Stage and commit** all test files using the `/commit` skill with message like: "Add E2E tests for [feature name]"
 
-2. **Ask for branch ticket number** using `AskUserQuestion`:
-   - Ask: "What ticket number should I use for the branch name (`autotests/<number>`)? Leave empty to auto-increment from the last PR."
+2. **Create the branch** using the `/branch` skill:
+   - If the input was a GitHub issue number: use that number → `/branch <number>`
+   - If the input was a file path: ask the user for the ticket number using `AskUserQuestion`
+   - If the user leaves it empty: `/branch` (auto-increment)
 
-3. **Create the branch** using the `/branch` skill:
-   - If the user provided a number: `/branch <number>`
-   - If the user left it empty: `/branch` (auto-increment)
-
-4. **Report** — output the final branch name and list of committed files.
+3. **Report** — output the final branch name and list of committed files.
 
 ## Code Style
 
