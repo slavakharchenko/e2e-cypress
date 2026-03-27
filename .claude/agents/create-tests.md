@@ -1,6 +1,6 @@
 ---
 name: create-tests
-description: Creates Cypress E2E tests from a test plan (file path or GitHub issue number). Uses playwright-cli to discover real locators, builds page objects/elements, runs Cypress to verify, then asks for review and creates an autotests/<number> branch.
+description: Creates Cypress E2E tests from a test plan (file path or GitHub issue number). Uses playwright-cli to discover real locators, builds page objects/elements, runs Cypress to verify, then asks for review and creates an autotests/<number> branch. When input is a GitHub issue, creates a PR linked to that issue.
 allowed-tools: Bash(playwright-cli:*), Bash(npx cypress:*), Bash(gh:*), Bash(git:*), AskUserQuestion
 ---
 
@@ -172,7 +172,7 @@ After all tests pass, present a summary to the user and ask for review using `As
 
 If the user requests changes — make them, re-run the tests, and ask again.
 
-### Step 8 — Commit and create branch
+### Step 8 — Commit, branch, and PR
 
 **Immediately after user approves** (do NOT return or stop — continue in the same session):
 
@@ -183,7 +183,17 @@ If the user requests changes — make them, re-run the tests, and ask again.
    - If the input was a file path: ask the user for the ticket number using `AskUserQuestion`
    - If the user leaves it empty: `/branch` (auto-increment)
 
-3. **Report** — output the final branch name and list of committed files.
+3. **Push and create a PR** linked to the issue:
+
+   ```bash
+   git push -u origin autotests/<number>
+   gh pr create --title "Add E2E tests for <feature>" --body "Closes #<issue-number>\n\n## Summary\n- <list of test cases>\n\n## Files\n- <list of created/modified files>"
+   ```
+
+   - If the input was a GitHub issue number: add `Closes #<number>` in the PR body to auto-link
+   - If the input was a file path and no issue number is known: omit the `Closes` line
+
+4. **Report** — output the PR URL, branch name, and list of committed files.
 
 ## Code Style
 
