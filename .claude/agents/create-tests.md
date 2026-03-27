@@ -68,27 +68,19 @@ Use `playwright-cli` to navigate the target page and discover real locators. The
    playwright-cli press Enter
    ```
 
-4. **Take a screenshot** for visual verification:
-
-   ```bash
-   playwright-cli screenshot
-   ```
-
-   Then read the screenshot image to verify the visual state.
-
-5. **Evaluate JS** to extract selectors, attributes, or page state:
+4. **Evaluate JS** to extract selectors, attributes, or page state:
 
    ```bash
    playwright-cli eval "JSON.stringify([...document.querySelectorAll('[data-testid]')].map(e => ({testid: e.dataset.testid, tag: e.tagName})))"
    ```
 
-6. **Close the browser** when done exploring:
+5. **Close the browser** when done exploring:
 
    ```bash
    playwright-cli close
    ```
 
-7. Note stable selectors in priority order:
+6. Note stable selectors in priority order:
    - `[data-testid="..."]` — preferred
    - `#id` — good
    - `[name="..."]`, `[role="..."][aria-label="..."]` — acceptable
@@ -158,7 +150,7 @@ If the test fails:
 
 1. Read the error output carefully
 2. Read the failure screenshot (path shown in Cypress output under `cypress/screenshots/`)
-3. Use `playwright-cli` to re-inspect the page (`snapshot`, `screenshot`, `eval`) and verify/fix locators
+3. Use `playwright-cli` to re-inspect the page (`snapshot`, `eval`) and verify/fix locators
 4. Fix the page element or page object
 5. Re-run until the test passes
 

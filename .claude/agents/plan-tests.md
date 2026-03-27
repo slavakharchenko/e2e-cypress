@@ -44,9 +44,6 @@ playwright-cli snapshot
 
 # Extract all data-testid attributes on the page
 playwright-cli eval "JSON.stringify([...document.querySelectorAll('[data-testid]')].map(e => ({testid: e.dataset.testid, tag: e.tagName, text: e.textContent?.trim().substring(0, 50)})))"
-
-# Take screenshot for visual reference
-playwright-cli screenshot
 ```
 
 Walk through the full feature workflow:
